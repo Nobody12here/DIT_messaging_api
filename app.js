@@ -46,13 +46,13 @@ async function sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddre
 // API Endpoint to send SMS
 app.post("/send-sms", async (req, res) => {
     try {
-        const { recipient, ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress } = req.body;
+        const {  ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress } = req.body;
 
-        if (!recipient || !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
+        if ( !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const response = await sendSms(recipient, ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress);
+        const response = await sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress);
         res.status(200).json({ message: "SMS sent successfully", data: response });
     } catch (error) {
         res.status(500).json({ error: "Failed to send SMS" });
