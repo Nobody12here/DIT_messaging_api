@@ -13,8 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 
-async function sendSms(recipient, ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress) {
-    if (!recipient || !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
+async function sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress) {
+    if ( !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
         throw new Error("Invalid input");
     }
 
