@@ -7,11 +7,11 @@ require("dotenv").config();
 const app = express();
 const port = 3000;
 
+app.use(express.json());
 // Enable CORS for all routes
 app.use(cors());
 
 // Middleware to parse JSON requests
-app.use(express.json());
 
 
 async function sendSms(ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress) {
@@ -59,18 +59,17 @@ app.post("/send-sms", async (req, res) => {
         res.status(500).json({ error: "Failed to send SMS" });
     }
 });
-app.post("/send-emai", async (req, res) => {
+app.post("/send-email", async (req, res) => {
     try {
         const { email, text } = req.body;
         if (!email || !text) {
-            return res.status(400).json({ error: "No email or text" })
-
+             res.status(400).json({ error: "No email or text" })
         }
 
         sendMail(email, text)
-        return res.status(200).json({ message: "Email sent sucessfully" })
+         res.status(200).json({ message: "Email sent sucessfully" })
     } catch (error) {
-        return res.status(400).json({ error: "Some error occured" })
+         res.status(400).json({ error: "Some error occured" })
     }
 })
 app.listen(port, () => {

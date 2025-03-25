@@ -39,4 +39,3 @@ export function sendMail(from, email) {
         }
     })
 }
-sendMail("muhammad.auzair123@gmail.com","This is a test email")
