@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const { sendMail } = require("./utils");
 require("dotenv").config();
 
 const app = express();
@@ -13,8 +14,8 @@ app.use(cors());
 app.use(express.json());
 
 
-async function sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress) {
-    if ( !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
+async function sendSms(ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress) {
+    if (!ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
         throw new Error("Invalid input");
     }
 
@@ -22,7 +23,7 @@ async function sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddre
 
     try {
         const data = {
-            "to": ["+46731833333","+46736550520"],
+            "to": ["+46731833333", "+46736550520"],
             "body": message,
             "encoding": "UNICODE",
             "longMessageMaxParts": "30",
@@ -46,19 +47,32 @@ async function sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddre
 // API Endpoint to send SMS
 app.post("/send-sms", async (req, res) => {
     try {
-        const {  ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress } = req.body;
+        const { ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress } = req.body;
 
-        if ( !ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
+        if (!ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const response = await sendSms( ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress);
+        const response = await sendSms(ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress);
         res.status(200).json({ message: "SMS sent successfully", data: response });
     } catch (error) {
         res.status(500).json({ error: "Failed to send SMS" });
     }
 });
+await post("/send-emai", async (req, res) => {
+    try {
+        const { email, text } = req.body;
+        if (!email || !text) {
+            return res.status(400).json({ error: "No email or text" })
 
+        }
+
+        sendMail(email, text)
+        return res.status(200).json({ message: "Email sent sucessfully" })
+    } catch (error) {
+        return res.status(400).json({ error: "Some error occured" })
+    }
+})
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
