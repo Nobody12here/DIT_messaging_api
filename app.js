@@ -59,7 +59,7 @@ app.post("/send-sms", async (req, res) => {
         res.status(500).json({ error: "Failed to send SMS" });
     }
 });
-post("/send-emai", async (req, res) => {
+app.post("/send-emai", async (req, res) => {
     try {
         const { email, text } = req.body;
         if (!email || !text) {
