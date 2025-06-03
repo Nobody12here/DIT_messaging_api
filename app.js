@@ -59,7 +59,9 @@ async function sendSms(messageType, details) {
         throw err;
     }
 }
-
+app.get("/",async(req,res)=>{
+    res.json("Hello world")
+})
 // API Endpoint to send presale SMS
 app.post("/send-presale-sms", async (req, res) => {
     try {
