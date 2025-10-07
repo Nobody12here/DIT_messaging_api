@@ -34,8 +34,8 @@ async function sendSms(messageType, details) {
         message = `NFT Reward Claimed\nEmail: ${email}\nDIT Amount: ${ditAmount}\nWallet Address: ${walletAddress}\nNFT Type: ${nftType}`;
     } 
     else if (messageType === "membership") {
-        const { crypto_currency, email, id, membership_added, purchase_date, quantity, receiver_address, usdt_amount } = details;
-        if (!crypto_currency || !email || typeof id === 'undefined' || typeof membership_added === 'undefined' || !purchase_date || typeof quantity === 'undefined' || !receiver_address || !usdt_amount) {
+        const { crypto_currency, email, quantity, receiver_address, usdt_amount } = details;
+        if (!crypto_currency || !email || !quantity || !receiver_address || !usdt_amount) {
             throw new Error("Missing required fields for membership");
         }
 
@@ -136,10 +136,12 @@ app.listen(port, () => {
 // API Endpoint to send membership SMS
 app.post("/send-membership-sms", async (req, res) => {
     try {
-        const { crypto_currency, email, membership_added, purchase_date, quantity, receiver_address, usdt_amount } = req.body;
+        const { crypto_currency, email, quantity, receiver_address, usdt_amount } = req.body;
 
        
-
+        if(!crypto_currency || !email || !quantity || !receiver_address || !usdt_amount){
+            res.status(400).json({message:"Some fields are required!"})
+        }
         const response = await sendSms("membership", {
             crypto_currency,
             email,
