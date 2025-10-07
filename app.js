@@ -33,6 +33,14 @@ async function sendSms(messageType, details) {
         }
         message = `NFT Reward Claimed\nEmail: ${email}\nDIT Amount: ${ditAmount}\nWallet Address: ${walletAddress}\nNFT Type: ${nftType}`;
     } 
+    else if (messageType === "membership") {
+        const { crypto_currency, email, id, membership_added, purchase_date, quantity, receiver_address, usdt_amount } = details;
+        if (!crypto_currency || !email || typeof id === 'undefined' || typeof membership_added === 'undefined' || !purchase_date || typeof quantity === 'undefined' || !receiver_address || !usdt_amount) {
+            throw new Error("Missing required fields for membership");
+        }
+
+        message = `Membership Purchased\nEmail: ${email}\nOrder ID: ${id}\nQuantity: ${quantity}\nUSDT Amount: ${usdt_amount}\nCrypto: ${crypto_currency}\nReceiver Address: ${receiver_address}\nMembership Added: ${membership_added}\nPurchase Date: ${purchase_date}`;
+    }
     else {
         throw new Error("Invalid message type");
     }
@@ -121,4 +129,30 @@ app.post("/send-email", async (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+});
+
+// API Endpoint to send membership SMS
+app.post("/send-membership-sms", async (req, res) => {
+    try {
+        const { crypto_currency, email, id, membership_added, purchase_date, quantity, receiver_address, usdt_amount } = req.body;
+
+        if (!crypto_currency || !email || typeof id === 'undefined' || typeof membership_added === 'undefined' || !purchase_date || typeof quantity === 'undefined' || !receiver_address || !usdt_amount) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const response = await sendSms("membership", {
+            crypto_currency,
+            email,
+            id,
+            membership_added,
+            purchase_date,
+            quantity,
+            receiver_address,
+            usdt_amount
+        });
+        
+        res.status(200).json({ message: "Membership SMS sent successfully", data: response });
+    } catch (error) {
+        res.status(500).json({ error: error.message || "Failed to send SMS" });
+    }
 });
