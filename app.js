@@ -138,9 +138,7 @@ app.post("/send-membership-sms", async (req, res) => {
     try {
         const { crypto_currency, email, membership_added, purchase_date, quantity, receiver_address, usdt_amount } = req.body;
 
-        if (!crypto_currency || !email || !typeof quantity === 'undefined' || !receiver_address || !usdt_amount) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+       
 
         const response = await sendSms("membership", {
             crypto_currency,
