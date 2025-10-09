@@ -39,7 +39,7 @@ async function sendSms(messageType, details) {
             throw new Error("Missing required fields for membership");
         }
 
-        message = `Membership Purchased\nEmail: ${email}\n\nQuantity: ${quantity}\nUSDT Amount: ${usdt_amount}\nCrypto: ${crypto_currency}\nReceiver Address: ${receiver_address}\n`;
+        message = `Voucher Purchased\nEmail: ${email}\n\nQuantity: ${quantity}\nUSDT Amount: ${usdt_amount}\nCrypto: ${crypto_currency}\n Sender Address: ${receiver_address}\n`;
     }
     else {
         throw new Error("Invalid message type");
