@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { sendMail } = require("./utils");
+const { sendMail, sendMembersipMail } = require("./utils");
 require("dotenv").config();
 
 const app = express();
@@ -18,21 +18,21 @@ async function sendSms(messageType, details) {
     }
 
     let message = "";
-    
+
     if (messageType === "presale") {
         const { ditAmount, usdtAmount, crypto, cryptoAmount, walletAddress } = details;
         if (!ditAmount || !usdtAmount || !crypto || !cryptoAmount || !walletAddress) {
             throw new Error("Missing required fields for presale");
         }
         message = `Diamond Tokens Ordered\nNumber of DIT: ${ditAmount} DIT\nOrder Amount: ${usdtAmount} USDT\nCrypto: ${crypto}\nAmount: ${cryptoAmount} ${crypto}\nWallet to send the DIT to: ${walletAddress}`;
-    } 
+    }
     else if (messageType === "nft-reward") {
         const { email, ditAmount, walletAddress, nftType } = details;
         if (!email || !ditAmount || !walletAddress || !nftType) {
             throw new Error("Missing required fields for NFT reward");
         }
         message = `NFT Reward Claimed\nEmail: ${email}\nDIT Amount: ${ditAmount}\nWallet Address: ${walletAddress}\nNFT Type: ${nftType}`;
-    } 
+    }
     else if (messageType === "membership") {
         const { crypto_currency, email, quantity, receiver_address, usdt_amount } = details;
         if (!crypto_currency || !email || !quantity || !receiver_address || !usdt_amount) {
@@ -40,6 +40,13 @@ async function sendSms(messageType, details) {
         }
 
         message = `Voucher Purchased\nEmail: ${email}\n\nQuantity: ${quantity}\nUSDT Amount: ${usdt_amount}\nCrypto: ${crypto_currency}\n Sender Address: ${receiver_address}\n`;
+    }
+    else if (messageType === "donation") {
+        const { ditAmount, usdtAmount, walletAddress } = details;
+        if (!ditAmount || !usdtAmount || !walletAddress) {
+            throw new Error("Missing required fields for donation");
+        }
+        message = `Donation Received\nDIT Amount: ${ditAmount} DIT\nUSDT Amount: ${usdtAmount} USDT\nWallet Address: ${walletAddress}`;
     }
     else {
         throw new Error("Invalid message type");
@@ -67,7 +74,7 @@ async function sendSms(messageType, details) {
         throw err;
     }
 }
-app.get("/",async(req,res)=>{
+app.get("/", async (req, res) => {
     res.json("Hello world")
 })
 // API Endpoint to send presale SMS
@@ -86,7 +93,7 @@ app.post("/send-presale-sms", async (req, res) => {
             cryptoAmount,
             walletAddress
         });
-        
+
         res.status(200).json({ message: "Presale SMS sent successfully", data: response });
     } catch (error) {
         res.status(500).json({ error: error.message || "Failed to send SMS" });
@@ -108,7 +115,7 @@ app.post("/send-nft-sms", async (req, res) => {
             walletAddress,
             nftType
         });
-        
+
         res.status(200).json({ message: "NFT reward SMS sent successfully", data: response });
     } catch (error) {
         res.status(500).json({ error: error.message || "Failed to send SMS" });
@@ -119,16 +126,47 @@ app.post("/send-email", async (req, res) => {
     try {
         const { email, text } = req.body;
         if (!email || !text) {
-             res.status(400).json({ error: "No email or text" })
+            res.status(400).json({ error: "No email or text" })
         }
 
         sendMail(email, text)
-         res.status(200).json({ message: "Email sent sucessfully" })
+        res.status(200).json({ message: "Email sent sucessfully" })
     } catch (error) {
-         res.status(400).json({ error: "Some error occured" })
+        res.status(400).json({ error: "Some error occured" })
     }
 });
+app.post("/voucher-confirmation-mail", async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
 
+        sendMembersipMail(email);
+        return res.status(200).json({ message: "Email sent successfully" });
+    } catch (error) {
+        return res.status(500).json({ error: "Some error occurred" });
+    }
+});
+app.post("/send-donation-sms", async (req, res) => {
+    try {
+        const { ditAmount, usdtAmount, walletAddress } = req.body;
+
+        if (!ditAmount || !usdtAmount || !walletAddress) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const response = await sendSms("donation", {
+            ditAmount,
+            usdtAmount,
+            walletAddress
+        });
+
+        res.status(200).json({ message: "Donation SMS sent successfully", data: response });
+    } catch (error) {
+        res.status(500).json({ error: error.message || "Failed to send SMS" });
+    }
+});
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
@@ -138,9 +176,9 @@ app.post("/send-membership-sms", async (req, res) => {
     try {
         const { crypto_currency, email, quantity, receiver_address, usdt_amount } = req.body;
 
-       
-        if(!crypto_currency || !email || !quantity || !receiver_address || !usdt_amount){
-            res.status(400).json({message:"Some fields are required!"})
+
+        if (!crypto_currency || !email || !quantity || !receiver_address || !usdt_amount) {
+            res.status(400).json({ message: "Some fields are required!" })
         }
         const response = await sendSms("membership", {
             crypto_currency,
@@ -149,7 +187,7 @@ app.post("/send-membership-sms", async (req, res) => {
             receiver_address,
             usdt_amount
         });
-        
+
         res.status(200).json({ message: "Membership SMS sent successfully", data: response });
     } catch (error) {
         res.status(500).json({ error: error.message || "Failed to send SMS" });
